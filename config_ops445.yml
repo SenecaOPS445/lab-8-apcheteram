@@ -1,0 +1,66 @@
+# Author: apersaud-cheteram
+---
+- name: Configuration for OPS445 Linux VM Machine
+  hosts: vmlab
+  user: student
+  become: yes
+  vars:
+    seneca_id: apersaud-cheteram
+    vm_user: student
+
+  tasks:
+    - name: Updates Apache
+      action: yum name=httpd state=latest
+
+    - name: Install EPEL repository
+      action: yum name=epel-release state=present
+
+    - name: Remove Tree Package
+      action: yum name=tree state=removed
+
+    - name: Set Hostname to apersaud-cheteram
+      hostname: 
+        name: "{{ seneca_id }}" 
+
+    - name: Create and add apersaud-cheteram with sudo access
+      user:
+        name: "{{ seneca_id }}"
+        groups: wheel
+        shell: /bin/bash
+        state: present
+
+    - name: Create .ssh directory for the apersaud-cheteram
+      file:
+        path: "/home/{{ seneca_id }}/.ssh"
+        state: directory
+        owner: "{{ seneca_id }}"
+        group: "{{ seneca_id }}"
+        mode: 0700
+
+    - name: Added SSH public key for the apersaud-cheteram
+      copy:
+        src: ~/.ssh/id_rsa.pub
+        dest: "/home/{{ seneca_id }}/.ssh/authorized_keys"
+        owner: "{{ seneca_id }}"
+        group: "{{ seneca_id }}"
+        mode: 0600
+
+    - name: Create directory for labs 1-8
+      file:
+        path: "/home/{{ seneca_id }}/ops445/lab{{ item }}"
+        state: directory
+        owner: "{{ seneca_id }}"
+        group: "{{ seneca_id }}"
+        mode: '0755'
+      loop: 
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+        - 8    
+
+
+          
